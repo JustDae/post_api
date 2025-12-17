@@ -16,7 +16,7 @@
         uses: appleboy/scp-action@v0.1.3
         with:
           host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
+          username: root
           key: ${{ secrets.VPS_KEY }}
           source: "."
           target: "/root/post_api"
