@@ -1,47 +1,47 @@
-  name: 🚀 Deploy NestJS Blog Backend API to VPS
+name: 🚀 Deploy NestJS Blog Backend API to VPS
 
-  on:
-    push:
-      branches: [main]
+on:
+  push:
+    branches: [main]
 
-  jobs:
-    deploy:
-      runs-on: ubuntu-latest
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-      steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Copy project to VPS
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.VPS_KEY }}
-          source: "."
-          target: "/root/post_api"
+    - name: Copy project to VPS
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_KEY }}
+        source: "."
+        target: "/root/post-api"
 
-      - name: Run deploy commands on VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_KEY }}
-          script: |
-            cd /root/nestjs-blog-backend
-            
-            # Matar el proceso que está usando el puerto 3000
-            echo "Matar proceso en el puerto 3000..."
-            sudo lsof -t -i:3000 | xargs sudo kill -9  # Mata el proceso que usa el puerto 3000
-            
-            # Asegúrate de que el archivo .env se copie correctamente
-            echo -e "${{ secrets.ENV_FILE }}" > .env
-            
-            # Instalar dependencias, construir y reiniciar la aplicación
-            npm install
-            npm run build
-            
-            # Reiniciar PM2 con el nuevo código
-            pm2 stop nestjs-blog-backend-api || true  # Detener el proceso si está en ejecución
-            pm2 delete nestjs-blog-backend-api || true  # Eliminar el proceso si ya está activo
-            pm2 start dist/main.js --name nestjs-blog-backend-api  # Iniciar el proceso desde el archivo compilado
+    - name: Run deploy commands on VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_KEY }}
+        script: |
+          cd /root/post-api
+          
+          # 1. Creamos el archivo de entorno
+          echo -e "${{ secrets.ENV_FILE }}" > .env
+          
+          # 2. Instalamos y Construimos
+          npm install
+          npm run build
+          
+          # 3. Reinicio LIMPIO con PM2 (Sin usar kill manual)
+          # Esto detiene el proceso si existe, lo borra y lo lanza de nuevo con el código nuevo.
+          pm2 stop nestjs-blog-backend-api || true
+          pm2 delete nestjs-blog-backend-api || true
+          pm2 start dist/main.js --name nestjs-blog-backend-api
+          
+          # 4. Guardamos la lista de procesos para que revivan si se reinicia el servidor
+          pm2 save
