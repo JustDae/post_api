@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
+import { Controller } from '@nestjs/common';
 
+@Controller('auth')
+export class AuthController{
 describe('AuthController', () => {
   let controller: AuthController;
 
@@ -15,4 +18,4 @@ describe('AuthController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
-});
+}});

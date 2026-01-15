@@ -1,30 +1,30 @@
-import {Test, TestingModule} from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AppService } from './app.service';
-import { AppController } from './app.controller';
-describe('AppService',()=>{
-    let appController: AppService;
 
-    beforeEach(async ()=>{
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [AppService],
-        }).compile();
+describe('AppService', () => {
+  let service: AppService;
 
-        service =module.get<AppService>(AppService);
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [AppService],
+    }).compile();
+
+    service = module.get<AppService>(AppService);
+  });
+
+  it('debería estar definido', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('getHealth() debería retornar el mensaje esperado', () => {
+    expect(service.getHealth()).toEqual({
+      service: 'posts-api service',
+      message: 'Online',
     });
+  });
 
-    it('deberia esta definido',()=>{
-      expect(service).toBeDefined();
-    });
-
-   it('getHello()deberia retornar el mensaje esperado', ()=>{
-        expect(service.getHello()).toBe(
-            'Hello World desde los poderosos programadores del Tercer Semestre',
-        );
-   });
-
-   it('getHello() deberia retornar un string no vacio', ()=>{
-     const result = service.getHello();
-     expect(typeof result).toBe('string');
-     expect(result.length).toBeGreaterThan(0);
-   });
+  it('getHealth() debería retornar un objeto', () => {
+    const result = service.getHealth();
+    expect(typeof result).toEqual('object');
+  });
 });
